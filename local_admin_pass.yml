@@ -1,0 +1,20 @@
+---
+- name: Reset Local Admin Password on Windows
+  hosts: windows_servers
+  gather_facts: false
+  vars:
+    new_admin_password: NewPassword123  # Replace with the desired new password
+
+  tasks:
+    - name: Reset Local Admin Password
+      ansible.builtin.win_shell: |
+        $newPassword = ConvertTo-SecureString "{{ new_admin_password }}" -AsPlainText -Force
+        $adminUser = [adsi]'WinNT://./Administrator,user'
+        $adminUser.SetPassword($newPassword)
+      become: yes
+      become_method: runas
+      register: result
+
+    - name: Check if Password Reset was Successful
+      debug:
+        var: result.stdout
