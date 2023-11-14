@@ -1,0 +1,31 @@
+---
+- name: Change WSUS Server Address on Windows
+  hosts: windows_servers
+  gather_facts: false
+  vars:
+    wsus_server_address: "http://new-wsus-server:8530"  # Replace with the desired WSUS server address
+
+  tasks:
+    - name: Set WSUS Server Address
+      ansible.builtin.win_regedit:
+        path: "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate"
+        name: "WUServer"
+        data: "{{ wsus_server_address }}"
+        type: string
+      become: yes
+      become_method: runas
+      register: result
+
+    - name: Set WSUS Status
+      ansible.builtin.win_regedit:
+        path: "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate"
+        name: "WUStatusServer"
+        data: "{{ wsus_server_address }}"
+        type: string
+      become: yes
+      become_method: runas
+
+    - name: Force WSUS Policy Update
+      ansible.builtin.win_shell: "gpupdate /force"
+      become: yes
+      become_method: runas
