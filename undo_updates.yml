@@ -1,0 +1,16 @@
+---
+- name: Undo Windows Updates
+  hosts: windows_servers
+  gather_facts: yes
+  become: yes
+
+  tasks:
+    - name: Get list of installed updates
+      win_shell: Get-HotFix | Select-Object -Property Description, HotFixID
+      register: installed_updates
+
+    - name: Uninstall updates
+      win_updates:
+        name: "{{ item.HotFixID }}"
+        state: absent
+      with_items: "{{ installed_updates.stdout_lines[3:] }}"
