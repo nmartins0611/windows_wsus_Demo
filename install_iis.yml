@@ -1,0 +1,24 @@
+---
+- 
+  hosts: windows_staging
+  collections:
+   - ansible.windows
+
+  tasks:
+
+    - name: Running Windows Update
+      ansible.windows.win_updates:
+        category_names: ['SecurityUpdates','CriticalUpdates','UpdateRollups', 'Updates', 'DefinitionUpdates']
+        reboot: yes
+
+    - name: Wait for system to become reachable over WinRM
+      ansible.builtin.wait_for_connection:
+        timeout: 900
+
+    - name: Install IIS (Web-Server and Web-Common-Http)
+      ansible.windows.win_feature:
+       name:
+        - Web-Server
+        - Web-Common-Http
+       state: absent
+      when: ansible_os_family == 'Windows'
