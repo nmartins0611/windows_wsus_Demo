@@ -20,5 +20,10 @@
        name:
         - Web-Server
         - Web-Common-Http
-       state: absent
+       state: present
       when: ansible_os_family == 'Windows'
+
+    - name: Start iis service
+      ansible.windows.win_service:
+        name: W3Svc
+        state: started
