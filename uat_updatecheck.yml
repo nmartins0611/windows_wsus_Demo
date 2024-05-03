@@ -1,6 +1,6 @@
 ---
 - name: Check Windows Updates
-  hosts: windows_servers
+  hosts: windows_uat
   gather_facts: false
 
   tasks:
