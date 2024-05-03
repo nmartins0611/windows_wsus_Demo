@@ -18,8 +18,8 @@
                 Write-Output "$($_.Title) (KB$($_.KBArticleIDs))"
             }
         }
-      become: yes
-      become_method: runas
+      # become: yes
+      # become_method: runas
       register: result
 
     - name: Display Updates Needed
