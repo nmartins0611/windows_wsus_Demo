@@ -1,0 +1,27 @@
+---
+- name: Check Windows Updates
+  hosts: windows_servers
+  gather_facts: false
+
+  tasks:
+    - name: Get Windows Update Status
+      ansible.builtin.win_shell: |
+        $updateSession = New-Object -ComObject Microsoft.Update.Session
+        $updateSearcher = $updateSession.CreateUpdateSearcher()
+        $searchResult = $updateSearcher.Search("IsInstalled=0")
+        $updatesNeeded = $searchResult.Updates
+
+        if ($updatesNeeded.Count -eq 0) {
+            Write-Output "No updates needed."
+        } else {
+            $updatesNeeded | ForEach-Object {
+                Write-Output "$($_.Title) (KB$($_.KBArticleIDs))"
+            }
+        }
+      # become: yes
+      # become_method: runas
+      register: result
+
+    - name: Display Updates Needed
+      debug:
+        var: result.stdout_lines
