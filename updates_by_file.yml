@@ -8,13 +8,12 @@
     github_token: "your-github-personal-access-token"
 
   tasks:
-    - name: Download KB numbers file from GitHub
-      get_url:
-        url: "https://raw.githubusercontent.com/nmartins0611/windows_wsus_Demo/main/updates.txt"
-        dest: "./kb_numbers.txt"
-     #   headers: "Authorization: token {{ github_token }}"
-      delegate_to: localhost
-
+     - name: Clone Terraform Manifests and build repo
+       ansible.builtin.git:
+        repo: "https://github.com/nmartins0611/windows_wsus_Demo.git"
+        dest: /tmp/srv
+        clone: yes
+        
     # - name: Read KB numbers from file
     #   read_csv:
     #     path: "./kb_numbers.txt"
@@ -37,7 +36,7 @@
 
     - name: Read KB numbers from file
       ansible.builtin.slurp:
-        src: "./kb_numbers.txt"
+        src: "/tmp/srv/windows_wsus_Demo/updates.txt"
       register: kb_content
 
     - name: Convert KB content from base64
