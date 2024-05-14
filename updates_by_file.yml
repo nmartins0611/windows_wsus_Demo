@@ -20,6 +20,7 @@
         path: "./kb_numbers.txt"
         delimiter: "\n"
       register: kb_list
+      delegate_to: localhost
 
     - name: Install updates by KB numbers
       win_updates:
