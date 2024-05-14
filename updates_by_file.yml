@@ -1,6 +1,6 @@
 ---
 - name: Update Windows machine with KB numbers from a GitHub file
-  hosts: windows_uat
+  hosts: windows
   vars:
     github_user: "your-github-username"
     github_repo: "your-repository"
@@ -8,47 +8,30 @@
     github_token: "your-github-personal-access-token"
 
   tasks:
-    - name: Clone Terraform Manifests and build repo
-      ansible.builtin.git:
-       repo: "https://github.com/nmartins0611/windows_wsus_Demo.git"
-       dest: /tmp/srv
-       clone: yes
-        
-    # - name: Read KB numbers from file
-    #   read_csv:
-    #     path: "./kb_numbers.txt"
-    #     delimiter: "\n"
-    #   register: kb_list
-
-    # - name: Install updates by KB numbers
-    #   win_updates:
-    #     category_names: ['SecurityUpdates', 'CriticalUpdates']
-    #     whitelist:
-    #       "{{ item }}"
-    #   loop: "{{ kb_list.list | map(attribute='column0') | list }}"
-    #   register: update_result
-
-    # - name: Display update results
-    #   debug:
-    #     msg: "The update result for {{ item.item }} is {{ item }}"
-    #   loop: "{{ update_result.results }}"
-    #   when: update_result is changed
+    - name: Download KB numbers file from GitHub
+      get_url:
+        url: "https://raw.githubusercontent.com/nmartins0611/windows_wsus_Demo/main/updates.txt"
+        dest: "./kb_numbers.txt"
+     #   headers: "Authorization: token {{ github_token }}"
+      delegate_to: localhost
 
     - name: Read KB numbers from file
-      ansible.builtin.slurp:
-        src: "/tmp/srv/windows_wsus_Demo/updates.txt"
-      register: kb_content
+      read_csv:
+        path: "./kb_numbers.txt"
+        delimiter: "\n"
+      register: kb_list
 
-    - name: Convert KB content from base64
-      ansible.builtin.set_fact:
-        kb_list: "{{ (kb_content['content'] | b64decode).split() }}"
-
-    - name: Install specific updates from KB numbers
-      ansible.windows.win_updates:
-        category_names: SecurityUpdates
-        whitelist: "{{ kb_list }}"
+    - name: Install updates by KB numbers
+      win_updates:
+        category_names: ['SecurityUpdates', 'CriticalUpdates']
+        whitelist:
+          "{{ item }}"
+      loop: "{{ kb_list.list | map(attribute='column0') | list }}"
       register: update_result
 
-    - name: Display update result
-      ansible.builtin.debug:
-        msg: "{{ update_result }}"
+    - name: Display update results
+      debug:
+        msg: "The update result for {{ item.item }} is {{ item }}"
+      loop: "{{ update_result.results }}"
+      when: update_result is changed
+
