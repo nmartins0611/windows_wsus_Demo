@@ -1,6 +1,6 @@
 ---
 - name: Update Windows machines with specific KB numbers
-  hosts: windows
+  hosts: windows_uat
   gather_facts: no
 
   tasks:
