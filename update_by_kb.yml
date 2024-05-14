@@ -1,0 +1,24 @@
+---
+- name: Install a specific KB update on Windows machines
+  hosts: windows_uat
+  vars:
+    kb_number: "KBxxxxxxx"  # Replace 'KBxxxxxxx' with the actual KB number
+
+  tasks:
+    - name: Install specific Windows update
+      win_updates:
+        category_names: ['SecurityUpdates', 'CriticalUpdates', 'UpdateRollups']
+        whitelist:
+          - "{{ kb_number }}"
+      register: update_result
+
+    - name: Check if update was applied
+      debug:
+        msg: "The update {{ kb_number }} was applied successfully."
+      when: update_result.changed
+
+    - name: Report no updates applied
+      debug:
+        msg: "No updates were applied. Either the update was already installed or it is not applicable."
+      when: not update_result.changed
+
