@@ -1,7 +1,10 @@
-
+---
+- name: Change WSUS Server Address on Windows
+  hosts: windows_uat
+  gather_facts: false
 
 - name: Install only particular updates based on the KB numbers
   ansible.windows.win_updates:
     category_names:
     - SecurityUpdates
-    accept_list:
+    accept_list: "{{ kb_item }}"
