@@ -1,6 +1,6 @@
 ---
 - name: Update Windows machine with KB numbers from a GitHub file
-  hosts: windows
+  hosts: windows_uat
   vars:
     github_user: "your-github-username"
     github_repo: "your-repository"
