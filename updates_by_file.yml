@@ -15,23 +15,41 @@
      #   headers: "Authorization: token {{ github_token }}"
       delegate_to: localhost
 
-    - name: Read KB numbers from file
-      read_csv:
-        path: "./kb_numbers.txt"
-        delimiter: "\n"
-      register: kb_list
+    # - name: Read KB numbers from file
+    #   read_csv:
+    #     path: "./kb_numbers.txt"
+    #     delimiter: "\n"
+    #   register: kb_list
 
-    - name: Install updates by KB numbers
-      win_updates:
-        category_names: ['SecurityUpdates', 'CriticalUpdates']
-        whitelist:
-          "{{ item }}"
-      loop: "{{ kb_list.list | map(attribute='column0') | list }}"
+    # - name: Install updates by KB numbers
+    #   win_updates:
+    #     category_names: ['SecurityUpdates', 'CriticalUpdates']
+    #     whitelist:
+    #       "{{ item }}"
+    #   loop: "{{ kb_list.list | map(attribute='column0') | list }}"
+    #   register: update_result
+
+    # - name: Display update results
+    #   debug:
+    #     msg: "The update result for {{ item.item }} is {{ item }}"
+    #   loop: "{{ update_result.results }}"
+    #   when: update_result is changed
+
+    - name: Read KB numbers from file
+      ansible.builtin.slurp:
+        src: "./kb_numbers.txt"
+      register: kb_content
+
+    - name: Convert KB content from base64
+      ansible.builtin.set_fact:
+        kb_list: "{{ (kb_content['content'] | b64decode).split() }}"
+
+    - name: Install specific updates from KB numbers
+      ansible.windows.win_updates:
+        category_names: SecurityUpdates
+        whitelist: "{{ kb_list }}"
       register: update_result
 
-    - name: Display update results
-      debug:
-        msg: "The update result for {{ item.item }} is {{ item }}"
-      loop: "{{ update_result.results }}"
-      when: update_result is changed
-
+    - name: Display update result
+      ansible.builtin.debug:
+        msg: "{{ update_result }}"
