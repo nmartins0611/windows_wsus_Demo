@@ -8,11 +8,11 @@
     github_token: "your-github-personal-access-token"
 
   tasks:
-     - name: Clone Terraform Manifests and build repo
-       ansible.builtin.git:
-        repo: "https://github.com/nmartins0611/windows_wsus_Demo.git"
-        dest: /tmp/srv
-        clone: yes
+    - name: Clone Terraform Manifests and build repo
+      ansible.builtin.git:
+       repo: "https://github.com/nmartins0611/windows_wsus_Demo.git"
+       dest: /tmp/srv
+       clone: yes
         
     # - name: Read KB numbers from file
     #   read_csv:
